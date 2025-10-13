@@ -5,15 +5,21 @@ local handecs = {
 }
 
 --- Creates a component from the specified table.
---- @param data table A table containing the keys and default values of the component.
---- @return number # The index of the component, or `0` if the data is not a table.
+--- @param data? table A table containing the keys and default values of the component. This may be `nil` to provide no properties.
+--- @return number # The index of the component.
 function handecs:component(data)
-   if type(data) == "table" then
+   if type(data) == "table" or type(data) == "nil" then
       local index = #self.components + 1
-      self.components[index] = data
+      self.components[index] = data or {}
       return index
    end
-   return 0
+   error(
+      "Unable to create component "
+         .. #self.components + 1
+         .. " if data is invalid (provided data must be table or nil, not "
+         .. type(data)
+         .. ")"
+   )
 end
 
 --- Creates a mutated, shallow copy of a component.
