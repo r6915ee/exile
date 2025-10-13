@@ -11,6 +11,8 @@ description = {
       supported Lua version at 5.1, possessing both functions and data methods,
       and a focus on the archetype design to leverage faster queries.
    ]],
+   homepage = "https://codeberg.org/r6915ee/handecs",
+   license = "MIT"
 }
 dependencies = {
    "lua >= 5.1, <= 5.4",
