@@ -23,24 +23,38 @@ function handecs:component(data)
    )
 end
 
+--- Fetches a component.
+--- @param index number The index of the component.
+function handecs:fetch(index)
+   if type(index) == "number" then
+      if type(self.components[index]) ~= "table" then
+         error("Component " .. index .. " must be a table, not a " .. type(self.components[index]))
+      end
+      return self.components[index]
+   end
+   error(
+      "Unable to fetch component "
+         .. index
+         .. " because index can only be a number, not a "
+         .. type(index)
+   )
+end
+
 --- Creates a mutated, shallow copy of a component.
 --- @param index number The index of the component.
 --- @param extra table Set of key-value pairs that overwrite the pair with the same key.
+--- @return table # The mutated copy of the component.
 function handecs:mutate(index, extra)
-   if type(self.components[index]) == "table" then
-      local copy = {}
-      for k, v in pairs(self.components[index]) do
-         copy[k] = v
-      end
-      for k, v in pairs(extra) do
-         if self.components[index][k] == nil then
-            error('No key "' .. k .. '" in component ' .. index)
-         end
-         copy[k] = v
-      end
-      return copy
+   local origin = self:fetch(index)
+   local copy = {}
+   for k, v in pairs(origin) do
+      copy[k] = v
    end
-   error("Component " .. index .. " is not a table")
+   for k, v in pairs(extra) do
+      if origin[k] == nil then error('No key "' .. k .. '" in component ' .. index) end
+      copy[k] = v
+   end
+   return copy
 end
 
 return handecs
