@@ -1,5 +1,6 @@
 --- @class handecs
 --- @field components table Defines all components.
+--- @field entities table
 local handecs = {
    components = {},
 }
@@ -16,7 +17,7 @@ function handecs:component(data)
    error(
       "Unable to create component "
          .. #self.components + 1
-         .. " if data is invalid (provided data must be table or nil, not "
+         .. " because data is invalid (provided data must be table or nil, not "
          .. type(data)
          .. ")"
    )
