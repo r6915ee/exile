@@ -1,6 +1,6 @@
 local handecs = require("handecs")
 
-handecs:component({
+local position = handecs:component({
    x = 0,
    y = 0,
 })
