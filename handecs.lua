@@ -1,11 +1,11 @@
 local handecs = {
-	components = {},
+   components = {},
 }
 
 function handecs:component(data)
-	local index = #self.components + 1
-	self.components[index] = data
-	return index
+   local index = #self.components + 1
+   self.components[index] = data
+   return index
 end
 
 return handecs
