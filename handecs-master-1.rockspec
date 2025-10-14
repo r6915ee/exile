@@ -8,8 +8,8 @@ description = {
    detailed = [[
       handecs is an ECS framework for Lua and derivative programming languages.
       It provides a system as Lua-native as possible, by having a minimum
-      supported Lua version at 5.1, possessing both functions and data methods,
-      and a focus on the archetype design to leverage faster queries.
+      supported Lua version at 5.1, possessing safe manipulation functions, and
+      a Bevy-inspired custom schedule system.
    ]],
    homepage = "https://codeberg.org/r6915ee/handecs",
    license = "MIT"
