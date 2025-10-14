@@ -7,9 +7,11 @@
 --- @class handecs
 --- @field components table Defines all components.
 --- @field entities table Defines all entities.
+--- @field schedules table Defines all schedules.
 local handecs = {
    components = {},
    entities = {},
+   schedules = {},
 }
 
 local function _shallowCopy(data)
@@ -96,6 +98,43 @@ function handecs:entity(list)
    end
    self.entities[#self.entities + 1] = entity
    return #self.entities
+end
+
+--- Creates a schedule, with an optional set of pre-defined systems.
+--- @param systems? table A list of functions to run as systems.
+--- @return number # The index of the schedule.
+function handecs:schedule(systems)
+   if systems ~= nil then
+      for k, v in ipairs(systems) do
+         if type(v) ~= "function" then
+            error("System " .. k .. " must be a function, not a " .. type(v))
+         end
+      end
+   end
+   self.schedules[#self.schedules + 1] = systems or {}
+   return #self.schedules
+end
+
+--- Invokes a schedule.
+--- @param index number The index of the schedule.
+--- @param ... any Arguments to pass to any systems associated with this schedule.
+function handecs:invoke(index, ...)
+   for k, v in ipairs(self.schedules[index]) do
+      if type(v) ~= "function" then
+         error("System " .. k .. " must be a function, not a " .. type(v))
+      end
+      v(...)
+   end
+end
+
+--- Assigns a system to a schedule.
+--- @param index number The index of the schedule.
+--- @param system function The system to assign.
+function handecs:assign(index, system)
+   if type(system) ~= "function" then
+      error("System being assigned cannot be " .. type(system) .. ", only function")
+   end
+   self.schedules[index][#self.schedules[index] + 1] = system
 end
 
 return handecs
