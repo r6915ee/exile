@@ -1,8 +1,9 @@
 --- @class handecs
 --- @field components table Defines all components.
---- @field entities table
+--- @field entities table Defines all entities.
 local handecs = {
    components = {},
+   entities = {},
 }
 
 local function _shallowCopy(data)
@@ -71,6 +72,24 @@ function handecs:mutate(index, extra)
       data[k] = v
    end
    return data
+end
+
+--- Creates an entity from a list of components.
+--- @param list table A list of components, either as their indexes or directly as valid component tables, to inject into the entity.
+--- @return number # The index of the entity.
+function handecs:entity(list)
+   local entity = {}
+   for _, component in ipairs(list) do
+      if type(component) == "number" then
+         entity[component] = handecs:_copy(component)
+      elseif type(component) == "table" then
+         local copy = _shallowCopy(component)
+         copy._index = nil
+         entity[component._index] = copy
+      end
+   end
+   self.entities[#self.entities + 1] = entity
+   return #self.entities
 end
 
 return handecs
