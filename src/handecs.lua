@@ -1,3 +1,9 @@
+--[[
+  Author: r6915ee
+  Repository: https://codeberg.org/r6915ee/handecs
+  License: MIT (https://codeberg.org/r6915ee/handecs/src/branch/master/LICENSE)
+]]
+
 --- @class handecs
 --- @field components table Defines all components.
 --- @field entities table Defines all entities.
