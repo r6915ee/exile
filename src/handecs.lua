@@ -5,6 +5,14 @@ local handecs = {
    components = {},
 }
 
+local function _shallowCopy(data)
+   local copy = {}
+   for k, v in pairs(data) do
+      copy[k] = v
+   end
+   return copy
+end
+
 --- Creates a component from the specified table.
 --- @param data? table A table containing the keys and default values of the component. This may be `nil` to provide no properties.
 --- @return number # The index of the component.
@@ -40,21 +48,29 @@ function handecs:fetch(index)
    )
 end
 
+function handecs:_cleanCopy(index) return _shallowCopy(self:fetch(index)) end
+
+function handecs:_copy(index)
+   local copy = self:_cleanCopy(index)
+   copy._index = index
+   return copy
+end
+
 --- Creates a mutated, shallow copy of a component.
 --- @param index number The index of the component.
 --- @param extra table Set of key-value pairs that overwrite the pair with the same key.
 --- @return table # The mutated copy of the component.
 function handecs:mutate(index, extra)
-   local origin = self:fetch(index)
-   local copy = {}
-   for k, v in pairs(origin) do
-      copy[k] = v
+   if extra == nil then
+      error('"extra" parameter needs to be specified when mutating for performance reasons')
    end
+   local data = self:_copy(index)
    for k, v in pairs(extra) do
-      if origin[k] == nil then error('No key "' .. k .. '" in component ' .. index) end
-      copy[k] = v
+      if data[k] == nil then error('No key "' .. k .. '" in component ' .. index) end
+      if k == "_index" then error("Cannot modify component index when performing mutation") end
+      data[k] = v
    end
-   return copy
+   return data
 end
 
 return handecs
