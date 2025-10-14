@@ -7,7 +7,7 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     lua5_1
     lua-language-server
-    luarocks
+    lua51Packages.luarocks
     stylua
     pre-commit
   ];
