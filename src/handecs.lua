@@ -51,23 +51,48 @@ end
 --- @return number # The index of the entity.
 function handecs:entity(list)
    local entity = {}
-   for _, component in ipairs(list) do
-      if type(component) == "number" then
-         if self._components[component] == nil then
-            error("Component " .. component .. " doesn't exist")
-         end
-         entity[component] = setmetatable({}, { __index = self._components[component] })
-      elseif type(component) == "table" then
-         local index = component._index
-         entity[index] = component
-         entity[index]._index = nil
-      else
-         error("Cannot add type " .. type(component) .. " as a component when creating an entity")
-      end
-   end
    self._entities[#self._entities + 1] = entity
+   for _, component in ipairs(list) do
+      self:cleanAdd(#self._entities, component)
+   end
    self:_attach(#self._entities)
    return #self._entities
+end
+
+--- Adds a component to an entity without reassigning an archetype.
+--- @param entity number The index of the entity.
+--- @param component number|table Either the index or a mutated version of a component.
+--- @return table # The entity's assigned component data.
+function handecs:cleanAdd(entity, component)
+   if type(component) == "number" then
+      if self._components[component] == nil then
+         error("Component " .. component .. " doesn't exist")
+      end
+      self._entities[entity][component] = setmetatable(
+         {},
+         { __index = self._components[component] }
+      )
+   elseif type(component) == "table" then
+      local index = component._index
+      self._entities[entity][index] = component
+      self._entities[entity][index]._index = nil
+   else
+      error("Cannot add type " .. type(component) .. " as a component when creating an entity")
+   end
+   return self._entities[entity]
+end
+
+--- Adds a component to an entity and reassigns its archetype.
+--- @param entity number The index of the entity.
+--- @param component number|table Either the index or a mutated version of a component.
+function handecs:add(entity, component)
+   local archetype = self._archetypes[self:getArchetype(entity)]
+   handecs:cleanAdd(entity, component)
+   local archetypeEntityIndex
+   for entityIndex = 1, #archetype do
+      if archetype[entityIndex] == entity then table.remove(archetype, entityIndex) end
+   end
+   self:_attach(entity)
 end
 
 --- Creates a schedule, with an optional set of pre-defined systems.
@@ -107,16 +132,26 @@ function handecs:assign(index, system)
    self._schedules[index][#self._schedules[index] + 1] = system
 end
 
-function handecs:_attach(index)
-   if type(self._entities[index]) ~= "table" then
-      error("Entity " .. index .. " must be table, not " .. type(self._entities[index]))
-   end
+local function _parseArchetype(data)
    local components = {}
-   for compIndex, _ in pairs(self._entities[index]) do
+   for compIndex, _ in pairs(data) do
       components[#components + 1] = compIndex
    end
    table.sort(components)
-   local archetype = table.concat(components, ",")
+   return table.concat(components, ",")
+end
+
+--- Helper function for getting the proper archetype of an entity.
+--- @param index number The index of the entity.
+function handecs:getArchetype(index)
+   if type(self._entities[index]) ~= "table" then
+      error("Entity " .. index .. " must be table, not " .. type(self._entities[index]))
+   end
+   return _parseArchetype(self._entities[index])
+end
+
+function handecs:_attach(index)
+   local archetype = handecs:getArchetype(index)
    self._archetypes[archetype] = self._archetypes[archetype] or {}
    self._archetypes[archetype][#self._archetypes[archetype] + 1] = index
    return 0
