@@ -8,6 +8,7 @@
 local handecs = {
    _components = {},
    _entities = {},
+   _archetypes = {},
    _schedules = {},
 }
 
@@ -65,6 +66,7 @@ function handecs:entity(list)
       end
    end
    self._entities[#self._entities + 1] = entity
+   self:_attach(#self._entities)
    return #self._entities
 end
 
@@ -103,6 +105,21 @@ function handecs:assign(index, system)
       error("System being assigned cannot be " .. type(system) .. ", only function")
    end
    self._schedules[index][#self._schedules[index] + 1] = system
+end
+
+function handecs:_attach(index)
+   if type(self._entities[index]) ~= "table" then
+      error("Entity " .. index .. " must be table, not " .. type(self._entities[index]))
+   end
+   local components = {}
+   for compIndex, _ in pairs(self._entities[index]) do
+      components[#components + 1] = compIndex
+   end
+   table.sort(components)
+   local archetype = table.concat(components, ",")
+   self._archetypes[archetype] = self._archetypes[archetype] or {}
+   self._archetypes[archetype][#self._archetypes[archetype] + 1] = index
+   return 0
 end
 
 return handecs
