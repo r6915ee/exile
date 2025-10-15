@@ -32,23 +32,6 @@ function handecs:component(data)
    )
 end
 
---- Fetches a component.
---- @param index number The index of the component.
-function handecs:fetch(index)
-   if type(index) == "number" then
-      if type(self.components[index]) ~= "table" then
-         error("Component " .. index .. " must be a table, not a " .. type(self.components[index]))
-      end
-      return self.components[index]
-   end
-   error(
-      "Unable to fetch component "
-         .. index
-         .. " because index can only be a number, not a "
-         .. type(index)
-   )
-end
-
 --- Creates a mutated, shallow copy of a component.
 --- @param index number The index of the component.
 --- @param extra table Set of key-value pairs that overwrite the pair with the same key.
