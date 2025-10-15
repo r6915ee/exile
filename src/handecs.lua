@@ -52,6 +52,9 @@ function handecs:entity(list)
    local entity = {}
    for _, component in ipairs(list) do
       if type(component) == "number" then
+         if self._components[component] ~= nil then
+            error("Component " .. component .. " doesn't exist")
+         end
          entity[component] = setmetatable({}, { __index = self._components[component] })
       elseif type(component) == "table" then
          local index = component._index
