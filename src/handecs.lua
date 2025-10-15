@@ -5,13 +5,10 @@
 ]]
 
 --- @class handecs
---- @field components table Defines all components.
---- @field entities table Defines all entities.
---- @field schedules table Defines all schedules.
 local handecs = {
-   components = {},
-   entities = {},
-   schedules = {},
+   _components = {},
+   _entities = {},
+   _schedules = {},
 }
 
 --- Creates a component from the specified table.
@@ -19,13 +16,13 @@ local handecs = {
 --- @return number # The index of the component.
 function handecs:component(data)
    if type(data) == "table" or type(data) == "nil" then
-      local index = #self.components + 1
-      self.components[index] = data or {}
+      local index = #self._components + 1
+      self._components[index] = data or {}
       return index
    end
    error(
       "Unable to create component "
-         .. #self.components + 1
+         .. #self._components + 1
          .. " because data is invalid (provided data must be table or nil, not "
          .. type(data)
          .. ")"
@@ -40,7 +37,7 @@ function handecs:mutate(index, extra)
    if extra == nil then
       error('"extra" parameter needs to be specified when mutating for performance reasons')
    end
-   local data = self.components[index]
+   local data = self._components[index]
    for k, v in pairs(extra) do
       if data[k] == nil then error('No key "' .. k .. '" in component ' .. index) end
    end
@@ -55,7 +52,7 @@ function handecs:entity(list)
    local entity = {}
    for _, component in ipairs(list) do
       if type(component) == "number" then
-         entity[component] = setmetatable({}, { __index = self.components[component] })
+         entity[component] = setmetatable({}, { __index = self._components[component] })
       elseif type(component) == "table" then
          local index = component._index
          entity[index] = component
@@ -64,8 +61,8 @@ function handecs:entity(list)
          error("Cannot add type " .. type(component) .. " as a component when creating an entity")
       end
    end
-   self.entities[#self.entities + 1] = entity
-   return #self.entities
+   self._entities[#self._entities + 1] = entity
+   return #self._entities
 end
 
 --- Creates a schedule, with an optional set of pre-defined systems.
@@ -79,15 +76,15 @@ function handecs:schedule(systems)
          end
       end
    end
-   self.schedules[#self.schedules + 1] = systems or {}
-   return #self.schedules
+   self._schedules[#self._schedules + 1] = systems or {}
+   return #self._schedules
 end
 
 --- Invokes a schedule.
 --- @param index number The index of the schedule.
 --- @param ... any Arguments to pass to any systems associated with this schedule.
 function handecs:invoke(index, ...)
-   for k, v in ipairs(self.schedules[index]) do
+   for k, v in ipairs(self._schedules[index]) do
       if type(v) ~= "function" then
          error("System " .. k .. " must be a function, not a " .. type(v))
       end
@@ -102,7 +99,7 @@ function handecs:assign(index, system)
    if type(system) ~= "function" then
       error("System being assigned cannot be " .. type(system) .. ", only function")
    end
-   self.schedules[index][#self.schedules[index] + 1] = system
+   self._schedules[index][#self._schedules[index] + 1] = system
 end
 
 return handecs
