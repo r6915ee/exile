@@ -82,17 +82,21 @@ function handecs:cleanAdd(entity, component)
    return self._entities[entity]
 end
 
+local function clearArchetypeEntity(archetype, index)
+   for entityIndex = 1, #archetype do
+      if archetype[entityIndex] == index then table.remove(archetype, entityIndex) end
+   end
+   if next(archetype) == nil then archetype = nil end
+end
+
 --- Adds a component to an entity and reassigns its archetype.
 --- @param entity number The index of the entity.
 --- @param component number|table Either the index or a mutated version of a component.
 function handecs:add(entity, component)
    local archetype = self._archetypes[self:getArchetype(entity)]
    handecs:cleanAdd(entity, component)
-   local archetypeEntityIndex
-   for entityIndex = 1, #archetype do
-      if archetype[entityIndex] == entity then table.remove(archetype, entityIndex) end
-   end
    self:_attach(entity)
+   clearArchetypeEntity(archetype, entity)
 end
 
 --- Creates a schedule, with an optional set of pre-defined systems.
