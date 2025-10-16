@@ -157,4 +157,44 @@ function handecs:_attach(index)
    return 0
 end
 
+--- Parses a set of query data.
+--- @param archetype string|table The archetype to parse.
+function handecs:parseQuery(archetype)
+   local archetypeStr
+   if type(archetype) == "table" then
+      archetypeStr = _parseArchetype(archetype)
+   elseif type(archetype) == "string" then
+      archetypeStr = archetype
+   elseif type(archetype) == "nil" then
+      error("Archetype name cannot be nil")
+   else
+      error(
+         "Archetype name "
+            .. archetype
+            .. " must be either a table or string, not "
+            .. type(archetype)
+      )
+   end
+   if type(self._archetypes[archetypeStr]) ~= "table" then
+      error(
+         "Archetype "
+            .. archetypeStr
+            .. " contents must be table, not "
+            .. type(self._archetypes[archetypeStr])
+      )
+   end
+   return self._archetypes[archetypeStr]
+end
+
+--- Queries an archetype.
+--- @param archetype string|table The archetype to query.
+function handecs:query(archetype)
+   local parsedQuery = self:parseQuery(archetype)
+   local entities = {}
+   for k, v in pairs(parsedQuery) do
+      entities[#entities + 1] = self._entities[v]
+   end
+   return entities
+end
+
 return handecs
