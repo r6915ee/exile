@@ -9,7 +9,8 @@ description = {
       exile is an ECS framework for Lua and derivative programming languages.
       It provides a system as Lua-native as possible, by having a minimum
       supported Lua version at 5.1, possessing safe manipulation functions, and
-      a Bevy-inspired custom schedule system.
+      a Bevy-inspired custom schedule system leveraging the first-class
+      citizenship of functions.
 
       Several noteworthy features on the performance-side include explicit
       value management, most objects using numerical indexing instead of
