@@ -1,11 +1,11 @@
 --[[
   Author: r6915ee
-  Repository: https://codeberg.org/r6915ee/handecs
-  License: MIT (https://codeberg.org/r6915ee/handecs/src/branch/master/LICENSE)
+  Repository: https://codeberg.org/r6915ee/exile
+  License: MIT (https://codeberg.org/r6915ee/exile/src/branch/master/LICENSE)
 ]]
 
---- @class handecs
-local handecs = {
+--- @class exile
+local exile = {
    _components = {},
    _entities = {},
    _archetypes = {},
@@ -15,7 +15,7 @@ local handecs = {
 --- Creates a component from the specified table.
 --- @param data? table A table containing the keys and default values of the component. This may be `nil` to provide no properties.
 --- @return number # The index of the component.
-function handecs:component(data)
+function exile:component(data)
    if type(data) == "table" or type(data) == "nil" then
       local index = #self._components + 1
       self._components[index] = data or {}
@@ -34,7 +34,7 @@ end
 --- @param index number The index of the component.
 --- @param extra table Set of key-value pairs that overwrite the pair with the same key.
 --- @return table # The mutated copy of the component.
-function handecs:mutate(index, extra)
+function exile:mutate(index, extra)
    if extra == nil then
       error('"extra" parameter needs to be specified when mutating for performance reasons')
    end
@@ -49,7 +49,7 @@ end
 --- Creates an entity from a list of components.
 --- @param list table A list of components, either as their indexes or directly as valid component tables, to inject into the entity.
 --- @return number # The index of the entity.
-function handecs:entity(list)
+function exile:entity(list)
    local entity = {}
    self._entities[#self._entities + 1] = entity
    for _, component in ipairs(list) do
@@ -63,7 +63,7 @@ end
 --- @param entity number The index of the entity.
 --- @param component number|table Either the index or a mutated version of a component.
 --- @return table # The entity's assigned component data.
-function handecs:cleanAdd(entity, component)
+function exile:cleanAdd(entity, component)
    if type(component) == "number" then
       if self._components[component] == nil then
          error("Component " .. component .. " doesn't exist")
@@ -92,9 +92,9 @@ end
 --- Adds a component to an entity and reassigns its archetype.
 --- @param entity number The index of the entity.
 --- @param component number|table Either the index or a mutated version of a component.
-function handecs:add(entity, component)
+function exile:add(entity, component)
    local archetype = self._archetypes[self:getArchetype(entity)]
-   handecs:cleanAdd(entity, component)
+   exile:cleanAdd(entity, component)
    self:_attach(entity)
    clearArchetypeEntity(archetype, entity)
 end
@@ -102,7 +102,7 @@ end
 --- Removes a component from an entity and reassigns its archetype.
 --- @param entity number The index of the entity.
 --- @param component number The index of the component to remove.
-function handecs:remove(entity, component)
+function exile:remove(entity, component)
    local archetype = self._archetypes[self:getArchetype(entity)]
    self._entities[entity][component] = nil
    self:_attach(entity)
@@ -112,7 +112,7 @@ end
 --- Creates a schedule, with an optional set of pre-defined systems.
 --- @param systems? table A list of functions to run as systems.
 --- @return number # The index of the schedule.
-function handecs:schedule(systems)
+function exile:schedule(systems)
    if systems ~= nil then
       for k, v in ipairs(systems) do
          if type(v) ~= "function" then
@@ -127,7 +127,7 @@ end
 --- Invokes a schedule.
 --- @param index number The index of the schedule.
 --- @param ... any Arguments to pass to any systems associated with this schedule.
-function handecs:invoke(index, ...)
+function exile:invoke(index, ...)
    for k, v in ipairs(self._schedules[index]) do
       if type(v) ~= "function" then
          error("System " .. k .. " must be a function, not a " .. type(v))
@@ -139,7 +139,7 @@ end
 --- Assigns a system to a schedule.
 --- @param index number The index of the schedule.
 --- @param system function The system to assign.
-function handecs:assign(index, system)
+function exile:assign(index, system)
    if type(system) ~= "function" then
       error("System being assigned cannot be " .. type(system) .. ", only function")
    end
@@ -157,14 +157,14 @@ end
 
 --- Helper function for getting the proper archetype of an entity.
 --- @param index number The index of the entity.
-function handecs:getArchetype(index)
+function exile:getArchetype(index)
    if type(self._entities[index]) ~= "table" then
       error("Entity " .. index .. " must be table, not " .. type(self._entities[index]))
    end
    return _parseArchetype(self._entities[index])
 end
 
-function handecs:_attach(index)
+function exile:_attach(index)
    local archetype = self:getArchetype(index)
    self._archetypes[archetype] = self._archetypes[archetype] or {}
    self._archetypes[archetype][#self._archetypes[archetype] + 1] = index
@@ -173,7 +173,7 @@ end
 
 --- Parses a set of query data.
 --- @param archetype string|table The archetype to parse.
-function handecs:parseQuery(archetype)
+function exile:parseQuery(archetype)
    local archetypeStr
    if type(archetype) == "table" then
       archetypeStr = _parseArchetype(archetype)
@@ -205,7 +205,7 @@ end
 
 --- Queries an archetype.
 --- @param archetype string|table The archetype to query.
-function handecs:query(archetype)
+function exile:query(archetype)
    local parsedQuery = self:parseQuery(archetype)
    local entities = {}
    for k, v in pairs(parsedQuery) do
@@ -214,4 +214,4 @@ function handecs:query(archetype)
    return entities
 end
 
-return handecs
+return exile

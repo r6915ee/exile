@@ -2,7 +2,7 @@
   pkgs ? import <nixpkgs> { },
 }:
 pkgs.mkShell {
-  name = "handecs";
+  name = "exile";
 
   buildInputs = with pkgs; [
     lua5_1
