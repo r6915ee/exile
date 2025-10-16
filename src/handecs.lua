@@ -99,6 +99,16 @@ function handecs:add(entity, component)
    clearArchetypeEntity(archetype, entity)
 end
 
+--- Removes a component from an entity and reassigns its archetype.
+--- @param entity number The index of the entity.
+--- @param component number The index of the component to remove.
+function handecs:remove(entity, component)
+   local archetype = self._archetypes[self:getArchetype(entity)]
+   self._entities[entity][component] = nil
+   self:_attach(entity)
+   clearArchetypeEntity(archetype, entity)
+end
+
 --- Creates a schedule, with an optional set of pre-defined systems.
 --- @param systems? table A list of functions to run as systems.
 --- @return number # The index of the schedule.
