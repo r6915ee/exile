@@ -59,6 +59,12 @@ function exile:entity(list)
    return #self._entities
 end
 
+--- Checks if an entity has a certain component.
+--- @param entity number The index of the entity.
+--- @param component number The index of the component to check for.
+--- @return boolean # Whether or not the entity possesses the component.
+function exile:entityHas(entity, component) return self._entities[entity][component] ~= nil end
+
 --- Adds a component to an entity without reassigning an archetype.
 --- @param entity number The index of the entity.
 --- @param component number|table Either the index or a mutated version of a component.
