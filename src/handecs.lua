@@ -151,7 +151,7 @@ function handecs:getArchetype(index)
 end
 
 function handecs:_attach(index)
-   local archetype = handecs:getArchetype(index)
+   local archetype = self:getArchetype(index)
    self._archetypes[archetype] = self._archetypes[archetype] or {}
    self._archetypes[archetype][#self._archetypes[archetype] + 1] = index
    return 0
