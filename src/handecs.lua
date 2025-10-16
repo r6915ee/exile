@@ -189,7 +189,10 @@ function handecs:parseQuery(archetype)
             .. type(archetype)
       )
    end
-   if type(self._archetypes[archetypeStr]) ~= "table" then
+   if
+      type(self._archetypes[archetypeStr]) ~= "table"
+      and type(self._archetypes[archetypeStr]) ~= "nil"
+   then
       error(
          "Archetype "
             .. archetypeStr
@@ -197,7 +200,7 @@ function handecs:parseQuery(archetype)
             .. type(self._archetypes[archetypeStr])
       )
    end
-   return self._archetypes[archetypeStr]
+   return self._archetypes[archetypeStr] or {}
 end
 
 --- Queries an archetype.
