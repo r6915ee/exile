@@ -114,7 +114,7 @@ end
 --- Removes one or more components from an entity and reassigns its archetype.
 --- @param entity number The index of the entity.
 --- @param ... number The index of the component to remove, per argument.
-function exile:remove(entity, ...)
+function exile:pull(entity, ...)
    local archetype = self._archetypes[self:getArchetype(entity)]
    for _, v in ipairs(arg) do
       self._entities[entity][v] = nil
