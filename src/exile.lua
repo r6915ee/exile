@@ -47,23 +47,27 @@ function exile:mutate(index, extra)
 end
 
 --- Creates an entity from a list of components.
---- @param list table A list of components, either as their indexes or directly as valid component tables, to inject into the entity.
+--- @param ... number|table A list of components, either as their indexes or directly as mutations.
 --- @return number # The index of the entity.
-function exile:entity(list)
-   local entity = {}
-   self._entities[#self._entities + 1] = entity
-   for _, component in ipairs(list) do
+function exile:entity(...)
+   self._entities[#self._entities + 1] = {}
+   for _, component in ipairs(arg) do
       self:cleanAdd(#self._entities, component)
    end
    self:_attach(#self._entities)
    return #self._entities
 end
 
---- Checks if an entity has a certain component.
+--- Checks if an entity has one or more specified components.
 --- @param entity number The index of the entity.
---- @param component number The index of the component to check for.
+--- @param ... number A list of components to check for.
 --- @return boolean # Whether or not the entity possesses the component.
-function exile:entityHas(entity, component) return self._entities[entity][component] ~= nil end
+function exile:entityHas(entity, ...)
+   for _, v in ipairs(arg) do
+      if self._entities[entity][v] == nil then return false end
+   end
+   return true
+end
 
 --- Adds a component to an entity without reassigning an archetype.
 --- @param entity number The index of the entity.
@@ -95,38 +99,40 @@ local function clearArchetypeEntity(archetype, index)
    if next(archetype) == nil then archetype = nil end
 end
 
---- Adds a component to an entity and reassigns its archetype.
+--- Adds one or more components to an entity and reassigns its archetype.
 --- @param entity number The index of the entity.
---- @param component number|table Either the index or a mutated version of a component.
-function exile:add(entity, component)
+--- @varargs ... number|table Either the index or a mutated version of a component, per argument.
+function exile:add(entity, ...)
    local archetype = self._archetypes[self:getArchetype(entity)]
-   exile:cleanAdd(entity, component)
+   for _, v in ipairs(arg) do
+      exile:cleanAdd(entity, v)
+   end
    self:_attach(entity)
    clearArchetypeEntity(archetype, entity)
 end
 
---- Removes a component from an entity and reassigns its archetype.
+--- Removes one or more components from an entity and reassigns its archetype.
 --- @param entity number The index of the entity.
---- @param component number The index of the component to remove.
-function exile:remove(entity, component)
+--- @param ... number The index of the component to remove, per argument.
+function exile:remove(entity, ...)
    local archetype = self._archetypes[self:getArchetype(entity)]
-   self._entities[entity][component] = nil
+   for _, v in ipairs(arg) do
+      self._entities[entity][v] = nil
+   end
    self:_attach(entity)
    clearArchetypeEntity(archetype, entity)
 end
 
 --- Creates a schedule, with an optional set of pre-defined systems.
---- @param systems? table A list of functions to run as systems.
+--- @param ... function A system to assign automatically, per argument.
 --- @return number # The index of the schedule.
-function exile:schedule(systems)
-   if systems ~= nil then
-      for k, v in ipairs(systems) do
-         if type(v) ~= "function" then
-            error("System " .. k .. " must be a function, not a " .. type(v))
-         end
+function exile:schedule(...)
+   for k, v in ipairs({ ... }) do
+      if type(v) ~= "function" then
+         error("System " .. k .. " must be a function, not a " .. type(v))
       end
    end
-   self._schedules[#self._schedules + 1] = systems or {}
+   self._schedules[#self._schedules + 1] = { ... } or {}
    return #self._schedules
 end
 
@@ -142,14 +148,16 @@ function exile:invoke(index, ...)
    end
 end
 
---- Assigns a system to a schedule.
+--- Assigns one or more systems to a schedule.
 --- @param index number The index of the schedule.
---- @param system function The system to assign.
-function exile:assign(index, system)
-   if type(system) ~= "function" then
-      error("System being assigned cannot be " .. type(system) .. ", only function")
+--- @param ... function A system to assign, per argument.
+function exile:assign(index, ...)
+   for _, v in ipairs({ ... }) do
+      if type(v) ~= "function" then
+         error("System being assigned cannot be " .. type(v) .. ", only function")
+      end
+      self._schedules[index][#self._schedules[index] + 1] = v
    end
-   self._schedules[index][#self._schedules[index] + 1] = system
 end
 
 local function _parseArchetype(data)
@@ -209,15 +217,23 @@ function exile:parseQuery(archetype)
    return self._archetypes[archetypeStr] or {}
 end
 
---- Queries an archetype.
---- @param archetype string|table The archetype to query.
-function exile:query(archetype)
-   local parsedQuery = self:parseQuery(archetype)
+function exile:_parseQueryData(queryData)
+   local parsedQuery = self:parseQuery(queryData)
    local entities = {}
-   for k, v in pairs(parsedQuery) do
-      entities[#entities + 1] = self._entities[v]
+   for _, v in pairs(parsedQuery) do
+      entities[v] = self._entities[v]
    end
    return entities
 end
+
+--- Queries an archetype through its string name.
+--- @param archetype string The archetype to query.
+--- @return table<number, table> # The results of the query.
+function exile:queryString(archetype) return self:_parseQueryData(archetype) end
+
+--- Queries an archetype.
+--- @param ... number A list of components to query for.
+--- @return table<number, table> # The results of the query.
+function exile:query(...) return self:_parseQueryData({ ... }) end
 
 return exile
