@@ -101,7 +101,7 @@ end
 
 --- Adds one or more components to an entity and reassigns its archetype.
 --- @param entity number The index of the entity.
---- @varargs ... number|table Either the index or a mutated version of a component, per argument.
+--- @param ... number|table Either the index or a mutated version of a component, per argument.
 function exile:push(entity, ...)
    local archetype = self._archetypes[self:getArchetype(entity)]
    for _, v in ipairs(arg) do
@@ -171,6 +171,7 @@ end
 
 --- Helper function for getting the proper archetype of an entity.
 --- @param index number The index of the entity.
+--- @return string # The entity's archetype name.
 function exile:getArchetype(index)
    if type(self._entities[index]) ~= "table" then
       error("Entity " .. index .. " must be table, not " .. type(self._entities[index]))
