@@ -102,7 +102,7 @@ end
 --- Adds one or more components to an entity and reassigns its archetype.
 --- @param entity number The index of the entity.
 --- @varargs ... number|table Either the index or a mutated version of a component, per argument.
-function exile:add(entity, ...)
+function exile:push(entity, ...)
    local archetype = self._archetypes[self:getArchetype(entity)]
    for _, v in ipairs(arg) do
       exile:cleanAdd(entity, v)
