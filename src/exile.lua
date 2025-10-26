@@ -245,7 +245,7 @@ function exile:queryString(archetype) return self:_parseQueryData(archetype) end
 function exile:query(...) return self:_parseQueryData({ ... }) end
 
 --- Queries all entities available.
---- @return table<number, table>
+--- @return table<number, table> # All of the entities.
 function exile:allEntities() return self._entities end
 
 return exile
