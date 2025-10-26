@@ -57,9 +57,10 @@ end
 --- @param ... number|table A list of components, either as their indexes or directly as mutations.
 --- @return number # The index of the entity.
 function exile:entity(...)
+   local components = { ... }
    self._entities[#self._entities + 1] = {}
-   for _, component in ipairs(arg) do
-      self:cleanAdd(#self._entities, component)
+   for i = 1, #components do
+      self:cleanAdd(#self._entities, components[i])
    end
    self:_attach(#self._entities)
    return #self._entities
@@ -77,8 +78,9 @@ end
 --- @param ... number A list of components to check for.
 --- @return boolean # Whether or not the entity possesses the component.
 function exile:entityHas(entity, ...)
-   for _, v in ipairs(arg) do
-      if self._entities[entity][v] == nil then return false end
+   local components = { ... }
+   for i = 1, #components do
+      if self._entities[entity][components[i]] == nil then return false end
    end
    return true
 end
@@ -110,9 +112,10 @@ end
 --- @param entity number The index of the entity.
 --- @param ... number|table Either the index or a mutated version of a component, per argument.
 function exile:push(entity, ...)
+   local components = { ... }
    local archetype = self._archetypes[self:getArchetype(entity)]
-   for _, v in ipairs(arg) do
-      exile:cleanAdd(entity, v)
+   for i = 1, #components do
+      exile:cleanAdd(entity, components[i])
    end
    self:_attach(entity)
    clearArchetypeEntity(archetype, entity)
@@ -122,9 +125,10 @@ end
 --- @param entity number The index of the entity.
 --- @param ... number The index of the component to remove, per argument.
 function exile:pull(entity, ...)
+   local components = { ... }
    local archetype = self._archetypes[self:getArchetype(entity)]
-   for _, v in ipairs(arg) do
-      self._entities[entity][v] = nil
+   for i = 1, #components do
+      self._entities[entity][components[i]] = nil
    end
    self:_attach(entity)
    clearArchetypeEntity(archetype, entity)
@@ -134,9 +138,10 @@ end
 --- @param ... function A system to assign automatically, per argument.
 --- @return number # The index of the schedule.
 function exile:schedule(...)
-   for k, v in ipairs({ ... }) do
-      if type(v) ~= "function" then
-         error("System " .. k .. " must be a function, not a " .. type(v))
+   local systems = { ... }
+   for i = 1, #systems do
+      if type(systems[i]) ~= "function" then
+         error("System " .. systems[i] .. " must be a function, not a " .. type(systems[i]))
       end
    end
    self._schedules[#self._schedules + 1] = { ... } or {}
@@ -147,11 +152,12 @@ end
 --- @param index number The index of the schedule.
 --- @param ... any Arguments to pass to any systems associated with this schedule.
 function exile:invoke(index, ...)
-   for k, v in ipairs(self._schedules[index]) do
-      if type(v) ~= "function" then
-         error("System " .. k .. " must be a function, not a " .. type(v))
+   local schedule = self._schedules[index]
+   for i = 1, #schedule do
+      if type(schedule[i]) ~= "function" then
+         error("System " .. schedule[i] .. " must be a function, not a " .. type(schedule[i]))
       end
-      v(...)
+      schedule[i](...)
    end
 end
 
@@ -159,11 +165,12 @@ end
 --- @param index number The index of the schedule.
 --- @param ... function A system to assign, per argument.
 function exile:assign(index, ...)
-   for _, v in ipairs({ ... }) do
-      if type(v) ~= "function" then
-         error("System being assigned cannot be " .. type(v) .. ", only function")
+   local systems = { ... }
+   for i = 1, #systems do
+      if type(systems[i]) ~= "function" then
+         error("System being assigned cannot be " .. type(systems[i]) .. ", only function")
       end
-      self._schedules[index][#self._schedules[index] + 1] = v
+      self._schedules[index][#self._schedules[index] + 1] = systems[i]
    end
 end
 
