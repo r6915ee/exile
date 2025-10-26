@@ -124,6 +124,13 @@ print(exile:entityHas(displayObject, 1)) -- true
 print(exile:entityHas(displayObject, 2)) -- false, since we pulled it earlier!
 ```
 
+Removing an entity is as simple as using `removeEntity`:
+
+```lua
+local dummyObject = exile:entity()
+exile:removeEntity(dummyObject)
+```
+
 ### Systems
 
 Systems are partially unconventional in `exile` for the preferred usage of
