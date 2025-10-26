@@ -1,3 +1,4 @@
+rockspec_format = "3.1"
 package = "exile"
 version = "master-1"
 source = {
@@ -28,4 +29,3 @@ build = {
       exile = "src/exile.lua",
    },
 }
-rockspec_format = "3.1"
