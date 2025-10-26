@@ -46,6 +46,13 @@ function exile:mutate(index, extra)
    return setmetatable(extra, { __index = data })
 end
 
+local function clearArchetypeEntity(archetype, index)
+   for entityIndex = 1, #archetype do
+      if archetype[entityIndex] == index then table.remove(archetype, entityIndex) end
+   end
+   if next(archetype) == nil then archetype = nil end
+end
+
 --- Creates an entity from a list of components.
 --- @param ... number|table A list of components, either as their indexes or directly as mutations.
 --- @return number # The index of the entity.
@@ -56,6 +63,13 @@ function exile:entity(...)
    end
    self:_attach(#self._entities)
    return #self._entities
+end
+
+--- Removes an entity from an archetype and then removes its data.
+--- @param entity number The index of the entity.
+function exile:removeEntity(entity)
+   clearArchetypeEntity(self:parseQuery(self:getArchetype(entity)), entity)
+   table.remove(self._entities, entity)
 end
 
 --- Checks if an entity has one or more specified components.
@@ -90,13 +104,6 @@ function exile:cleanAdd(entity, component)
       error("Cannot add type " .. type(component) .. " as a component when creating an entity")
    end
    return self._entities[entity]
-end
-
-local function clearArchetypeEntity(archetype, index)
-   for entityIndex = 1, #archetype do
-      if archetype[entityIndex] == index then table.remove(archetype, entityIndex) end
-   end
-   if next(archetype) == nil then archetype = nil end
 end
 
 --- Adds one or more components to an entity and reassigns its archetype.
