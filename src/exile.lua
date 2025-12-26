@@ -251,6 +251,30 @@ function exile:queryString(archetype) return self:_parseQueryData(archetype) end
 --- @return table<number, table> # The results of the query.
 function exile:query(...) return self:_parseQueryData({ ... }) end
 
+--- Operates on the entities of a provided query. This may also be used to theoretically operate on any table as a whole.
+--- @param closure function The function to run on each entity.
+--- @param query table The query to use.
+function exile:operateQuery(closure, query)
+   local current_index
+   while next(query, current_index) do
+      local index, entity = next(query, current_index)
+      closure(index, entity)
+      current_index = index
+   end
+end
+
+--- Queries an archetype through its string name and runs a function on all of the archetype's entities.
+--- @param closure function The function to run on each entity.
+--- @param archetype string The archetype to query.
+function exile:operateString(closure, archetype)
+   self:operateQuery(closure, self:queryString(archetype))
+end
+
+--- Queries an archetype and runs a function on all of the archetype's entities.
+--- @param closure function The function to run on each entity.
+--- @param ... number A list of components to initially query for.
+function exile:operate(closure, ...) self:operateQuery(closure, self:query(...)) end
+
 --- Queries all entities available.
 --- @return table<number, table> # All of the entities.
 function exile:allEntities() return self._entities end
