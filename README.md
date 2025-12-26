@@ -7,20 +7,20 @@ design concepts with managing objects.
 
 ## Glossary
 
-* **Entities**: Entities, at their core, are simply integer keys that point
+- **Entities**: Entities, at their core, are simply integer keys that point
   torwards a set of information describing a set of components. In the case of
   `exile`, entities are used as keys to a set of tables describing associated
   components for that entity.
-* **Components**: Components are simply sets of data that can be used and
+- **Components**: Components are simply sets of data that can be used and
   manipulated by systems. An entity may refer to multiple different components
   at once.
-* **Systems**: Systems are simply functions that operate on entities with
+- **Systems**: Systems are simply functions that operate on entities with
   certain components, typically through archetypes. They are invoked by
   schedules.
-* **Schedules**: A concept unique to only some ECS frameworks, including
+- **Schedules**: A concept unique to only some ECS frameworks, including
   `exile`, schedules categorize various systems together to be run at certain
   intervals specified by the base program.
-* **Archetypes**: Archetypes, a feature popularized by
+- **Archetypes**: Archetypes, a feature popularized by
   [Unity](https://unity.com/), categorize entities based on their associated
   components. They are used for querying operations.
 
@@ -137,7 +137,7 @@ Systems are partially unconventional in `exile` for the preferred usage of
 a schedules system, particularly inspired from [Bevy](https://bevy.org/).
 
 A schedule may be initiated with an initial set of systems using the following
-`schedule` method, which accepts a set of variadic arguments consisting *only*
+`schedule` method, which accepts a set of variadic arguments consisting _only_
 of functions, which are systems themselves:
 
 ```lua
@@ -155,7 +155,7 @@ exile:invoke(hello, "exile") -- Hello, exile!
 ```
 
 A schedule may have one or more systems assigned at runtime using the `assign`
-method:
+method; however, there is **no** method for removing a system.
 
 ```lua
 exile:assign(hello, function(name)
@@ -180,10 +180,21 @@ for k, v in pairs(exile:query(position, velocity)) do
 end
 ```
 
-`queryString` is a slightly faster alternative to this method that operates
-directly using the archetype name provided, instead of converting the variadic
-arguments to a valid archetype name. However, it requires knowing the archetype
-name beforehand, which includes component indexes separated by single commas:
+However, this method of entity manipulation from a query is not efficient. The
+reason is because of the direct usage of `pairs`, which is often considered
+slow. Most people may want to use the specialized `operate` method instead,
+which avoids the usage of `pairs` and keeps the actual declaration simple. The
+same example with `operate` would look like:
+
+```lua
+exile:operate(function(index, entity) print(index .. ": " .. tostring(entity)) end, position, velocity)
+```
+
+`queryString` is a slightly faster alternative to `query` that queries directly
+using the archetype name provided, instead of converting the variadic arguments
+to a valid archetype name. However, it requires knowing the archetype name
+beforehand, which is in the form of _raw_ component indexes separated by commas
+in numerical order:
 
 ```lua
 for k, v in pairs(exile:queryString("1,3")) do
@@ -191,7 +202,25 @@ for k, v in pairs(exile:queryString("1,3")) do
 end
 ```
 
-`allEntities` is a simpler query method that queries *all* entities:
+Due to its performance benefit, `queryString` has an associated method similar
+to `operate` called `operateString`, which uses `queryString` instead of
+`query`. The same example above, but with this method, would be:
+
+```lua
+exile:operateString(function(index, entity) print(index .. ": " .. tostring(entity)) end, "1,3")
+```
+
+Finally, `operateQuery` provides the same functionality as `operate`, but
+instead operates on a _raw_ query - that is, the query has already been
+collected for further use. The two prior operation methods use this method
+internally.
+
+```lua
+exile:operateQuery(function(index, entity) print(index .. ": " .. tostring(entity)) end, exile:query(1, 3))
+exile:operateQuery(function(index, entity) print(index .. ": " .. tostring(entity)) end, exile:queryString("1,3"))
+```
+
+`allEntities` is a simpler query method that queries _all_ entities:
 
 ```lua
 local extraEntity = exile:entity()
